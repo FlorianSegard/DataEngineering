@@ -26,7 +26,6 @@
 ### Component to Choose:
 
 - **Kafka Stream Cluster** for real-time data stream management and processing. Kafka is well-suited for this role due to its ability to handle large volumes of real-time data with high availability.
-- **Cluster Database AP** (e.g., Cassandra for high availability) for temporary storage of data needed for triggering alerts. This ensures data availability even in case of partial system failures.
 
 By combining these elements, your architecture will be able to meet both technical and business requirements for alert services and long-term statistical analysis.
 

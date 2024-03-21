@@ -27,6 +27,4 @@
 
 - **Kafka Stream Cluster** for real-time data stream management and processing. Kafka is well-suited for this role due to its ability to handle large volumes of real-time data with high availability.
 
-By combining these elements, your architecture will be able to meet both technical and business requirements for alert services and long-term statistical analysis.
-
 ## Thank You for Your Attention!

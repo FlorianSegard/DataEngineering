@@ -1,30 +1,156 @@
-# Data Engineering Project
+# Data Engineering Project : Drone Data Processor
 
-## Question 1: Statistics
+## Prérequis
 
-### Technical and Business Constraints for Data Storage:
+Avant de commencer, assurez-vous d'avoir téléchargé et extrait les fichiers suivants à la racine du projet :
 
-- **Data Consistency**: Data for statistics must be consistent and accurate to ensure long-term analysis integrity.
-- **Data Integrity**: Stored data must be complete and error-free to ensure the reliability of statistical analysis.
-- **Security**: Sensitive individual data must be secured to comply with confidentiality and regulatory requirements.
-- **Scalability**: The system must be able to scale to handle increased data volume without performance loss.
-- **Data Durability**: Data must be durably preserved to allow historical analysis.
+1. [Apache Kafka 2.13-3.7.0](https://www.apache.org/dyn/closer.cgi?path=/kafka/3.7.0/kafka_2.13-3.7.0.tgz)
+2. [Apache Spark 3.5.1 avec Hadoop 3](https://spark.apache.org/downloads.html)
 
-### Required Components:
+La structure du projet doit ressembler à ceci :
 
-- **Cluster Database CP** (e.g., MongoDB for strong consistency) for storing and managing long-term statistical data. A CP database system will ensure that all reads return the most recent version of the data.
-- **Relational Database Management System** (if opting for SQL databases) or Data Warehouse solutions for storing and analyzing large volumes of data.
+```plaintext
+.
+├── ArchitectureDE.jpg
+├── kafka_2.13-3.7.0
+├── dataProcessSpark
+│   ├── build.sbt
+│   ├── checkpoint
+│   ├── datalake
+│   ├── dumps
+│   ├── project
+│   ├── SaveDatalake
+│   └── src
+│       └── main
+│           └── scala
+│               └── processdata.scala
+├── projectPresentation.pptx
+├── README.md
+├── spark-3.5.1-bin-hadoop3
+├── streamDatageneration
+│   ├── build.sbt
+│   ├── dumps
+│   ├── project
+│   └── src
+│       └── main
+│           └── scala
+│               └── generate.scala
+```
 
-## Question 2: Alerts
+## Installation et Configuration
 
-### Business Constraint for Architecture:
+1. Téléchargez et extrayez Apache Kafka et Apache Spark comme mentionné ci-dessus.
+2. Configurez les variables d'environnement pour Spark :
 
-- **Real-Time Availability**: The system must be capable of detecting and notifying potential threats without delay, requiring high availability.
-- **Responsiveness**: Alert processing must be fast to enable immediate intervention in the case of detecting a high-risk individual.
-- **Reliability**: False alerts must be minimized to maintain system credibility.
+   ```sh
+   export SPARK_HOME=/path/to/spark-3.5.1-bin-hadoop3
+   export PATH=$SPARK_HOME/bin:$PATH
+   ```
 
-### Component to Choose:
+## Démarrage des Services
 
-- **Kafka Stream Cluster** for real-time data stream management and processing. Kafka is well-suited for this role due to its ability to handle large volumes of real-time data with high availability.
+1. Démarrez Zookeeper :
 
-## Thank You for Your Attention!
+   ```sh
+   kafka_2.13-3.7.0/bin/zookeeper-server-start.sh kafka_2.13-3.7.0/config/zookeeper.properties
+   ```
+
+2. Démarrez le serveur Kafka :
+
+   ```sh
+   kafka_2.13-3.7.0/bin/kafka-server-start.sh kafka_2.13-3.7.0/config/server.properties
+   ```
+
+3. Créez un topic Kafka nommé `drone-data` :
+
+   ```sh
+   kafka_2.13-3.7.0/bin/kafka-topics.sh --create --topic drone-data --bootstrap-server localhost:9092
+   ```
+
+## Génération des Données
+
+1. Allez dans le répertoire `streamDatageneration` :
+
+   ```sh
+   cd streamDatageneration
+   ```
+
+2. Nettoyez, compilez et exécutez le générateur de données :
+
+   ```sh
+   sbt clean
+   sbt compile
+   sbt run
+   ```
+
+## Traitement des Données
+
+1. Allez dans le répertoire `dataProcessSpark` :
+
+   ```sh
+   cd ../dataProcessSpark
+   ```
+
+2. Nettoyez, compilez et packagez le projet :
+
+   ```sh
+   sbt clean
+   sbt package
+   ```
+
+3. Soumettez l'application Spark pour traiter les données :
+
+   ```sh
+   ../spark-3.5.1-bin-hadoop3/bin/spark-submit \
+     --class DroneDataProcessor \
+     --master local[*] \
+     --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,org.apache.kafka:kafka-clients:3.7.0 \
+     target/scala-2.12/dronedataprocessor_2.12-0.1.jar
+   ```
+
+4. Compilez et exécutez le traitement des données :
+
+   ```sh
+   sbt compile
+   sbt run
+   ```
+
+## Schéma des Données
+
+- **id**: Integer
+- **timestamp**: Long
+- **latitude**: Double
+- **longitude**: Double
+- **altitude**: Double
+- **dangerousity**: Double
+
+## Structure des Répertoires
+
+```plaintext
+drone-data-processor/
+├── src/
+│   ├── main/
+│   │   ├── resources/
+│   │   └── scala/
+│   │       └── processdata.scala
+├── target/
+├── project/
+├── build.sbt
+└── README.md
+```
+
+## Configuration des Checkpoints
+
+Le répertoire de checkpoint est configuré dans le code comme suit :
+
+```scala
+.option("checkpointLocation", "checkpoint")
+```
+
+Le répertoire de sauvegarde des données est configuré comme suit :
+
+```scala
+.option("path", "SaveDatalake")
+```
+
+Assurez-vous que ces répertoires existent et sont accessibles par Spark.

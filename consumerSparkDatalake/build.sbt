@@ -1,4 +1,4 @@
-name := "DroneDataProcessor"
+name := "ConsumerDatalake"
 
 version := "0.1"
 

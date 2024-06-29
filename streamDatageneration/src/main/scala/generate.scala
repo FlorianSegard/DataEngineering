@@ -3,6 +3,9 @@ import java.util.Properties
 import scala.util.Random
 import scala.annotation.tailrec
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+
 case class DroneData(id: Int, timestamp: Long, latitude: Double, longitude: Double, altitude: Double, dangerousity: Double)
 
 object DataGenerator {
@@ -15,22 +18,34 @@ object DataGenerator {
     new KafkaProducer[String, String](props)
   }
 
+  def objectMapper: ObjectMapper = {
+    val mapper = new ObjectMapper()
+    mapper.registerModule(DefaultScalaModule)  // Register the DefaultScalaModule
+    mapper
+  }
+
+  def nextDoubleInRange(min: Double, max: Double): Double = {
+    val rand = new Random()
+    rand.nextDouble() * (max - min) + min
+  }
+
   def generateData(id: Int): DroneData = {
     val rand = new Random()
     DroneData(
-        id = id,
-        timestamp = System.currentTimeMillis(),
-        latitude = rand.between(-90.0, 90.0),
-        longitude = rand.between(-180.0, 180.0),
-        altitude = rand.between(0.0, 12000.0),
-        dangerousity = rand.nextDouble()
+      id = id,
+      timestamp = System.currentTimeMillis(),
+      latitude = nextDoubleInRange(-90.0, 90.0),
+      longitude = nextDoubleInRange(-180.0, 180.0),
+      altitude = nextDoubleInRange(0.0, 12000.0),
+      dangerousity = rand.nextDouble()
     )
   }
 
   @tailrec
   def sendDataRecursively(producer: KafkaProducer[String, String], topic: String, currentId: Int): Unit = {
     val data = generateData(currentId)
-    val record = new ProducerRecord[String, String](topic, currentId.toString, data.toString)
+    val jsonData = objectMapper.writeValueAsString(data)
+    val record = new ProducerRecord[String, String](topic, currentId.toString, jsonData)
     producer.send(record)
     Thread.sleep(1000)
     sendDataRecursively(producer, topic, currentId + 1)

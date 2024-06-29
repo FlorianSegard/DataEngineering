@@ -22,28 +22,23 @@ object DroneDataProcessor {
       .add("dangerousity", DoubleType)
 
     // Lecture des données depuis Kafka
-    val droneDataStream = spark
+    val rawStream = spark
       .readStream
       .format("kafka")
       .option("kafka.bootstrap.servers", "localhost:9092")
       .option("subscribe", "drone-data")
       .load()
       .selectExpr("CAST(value AS STRING) as message")
+
+    // Désérialisation des messages JSON en DataFrame en utilisant le schéma défini
+    val droneDataStream = rawStream
       .select(from_json($"message", droneDataSchema).as("data"))
       .select("data.*")
 
-    // Filtrage des données en fonction de la dangerousity
-    val highRiskStream = droneDataStream
-      .filter($"dangerousity" > 0.9)
-
-    // Écriture des données filtrées dans un fichier (simulation d'un datalake)
-    val query = highRiskStream
-      .writeStream
+    // Affichage des données structurées dans la console
+    val query = droneDataStream.writeStream
+      .format("console")
       .outputMode("append")
-      .format("csv")  // Vous pouvez choisir d'autres formats comme parquet ou json
-      .option("path", "datalake")
-      //.option("checkpointLocation", "path/to/your/checkpoint/directory")
-      .trigger(Trigger.ProcessingTime("1 minute"))  // Déclenche l'écriture toutes les minutes
       .start()
 
     query.awaitTermination()

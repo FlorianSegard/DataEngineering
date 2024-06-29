@@ -3,6 +3,8 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types._
 
+
+
 object DroneDataProcessor {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder
@@ -34,13 +36,15 @@ object DroneDataProcessor {
     val droneDataStream = rawStream
       .select(from_json($"message", droneDataSchema).as("data"))
       .select("data.*")
-
-    // Affichage des données structurées dans la console
+        
+    // Écriture des données structurées dans des fichiers JSON
     val query = droneDataStream.writeStream
-      .format("console")
+      .format("json")
+      .option("path", "SaveDatalake") 
+      .option("checkpointLocation", "checkpoint")  
       .outputMode("append")
+      .trigger(Trigger.ProcessingTime("1 minute"))
       .start()
-
     query.awaitTermination()
   }
 }

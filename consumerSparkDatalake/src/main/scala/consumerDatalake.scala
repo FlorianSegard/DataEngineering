@@ -3,13 +3,16 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types._
 
-
-
 object ConsumerDatalake {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder
       .appName("Drone Data Processor")
       .master("local[*]")
+      .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
+      .config("spark.hadoop.fs.s3a.access.key", "StrongPass!2024")
+      .config("spark.hadoop.fs.s3a.secret.key", "hadoopUser123")
+      .config("spark.hadoop.fs.s3a.path.style.access", "true")
+      .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
       .getOrCreate()
 
     import spark.implicits._
@@ -40,11 +43,11 @@ object ConsumerDatalake {
       .select(from_json($"message", droneDataSchema).as("data"))
       .select("data.*")
         
-    // Écriture des données structurées dans des fichiers JSON
+    // Écriture des données structurées dans MinIO
     val query = droneDataStream.writeStream
       .format("json")
-      .option("path", "SaveDatalake") 
-      .option("checkpointLocation", "checkpoint/all-data")  
+      .option("path", "s3a://drone-data-lake/") // Écrire dans MinIO
+      .option("checkpointLocation", "s3a://drone-data-lake/checkpoint/all-data")  // Checkpoint dans MinIO
       .outputMode("append")
       .trigger(Trigger.ProcessingTime("1 minute"))
       .start()
@@ -52,4 +55,3 @@ object ConsumerDatalake {
     query.awaitTermination()
   }
 }
-

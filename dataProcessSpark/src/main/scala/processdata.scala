@@ -27,7 +27,7 @@ object DroneDataProcessor {
     val rawStream = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", "kafka:9092")
       .option("subscribe", "drone-data")
       .load()
       .selectExpr("CAST(value AS STRING) as message")

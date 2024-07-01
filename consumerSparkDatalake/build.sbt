@@ -15,6 +15,11 @@ libraryDependencies ++= Seq(
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.13.3",
   "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.13.3",
   "org.slf4j" % "slf4j-api" % "1.7.32",
-  "org.slf4j" % "slf4j-simple" % "1.7.32"
+  "org.slf4j" % "slf4j-simple" % "1.7.32",
+
+  "org.apache.hadoop" % "hadoop-common" % "3.3.0",
+  "org.apache.hadoop" % "hadoop-aws" % "3.3.0",
+  "com.amazonaws" % "aws-java-sdk-bundle" % "1.11.888"
+
 )
 

@@ -8,7 +8,7 @@ object DataAnalysis {
       .appName("Drone Data Analysis")
       .master("local[*]")
       .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
-      .config("spark.hadoop.fs.s3a.access.key", "StrongPass2024")
+      .config("spark.hadoop.fs.s3a.access.key", "StrongPass!2024")
       .config("spark.hadoop.fs.s3a.secret.key", "hadoopUser123")
       .config("spark.hadoop.fs.s3a.path.style.access", "true")
       .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
@@ -30,7 +30,7 @@ object DataAnalysis {
 
     // Question 1: Nombre total d'alertes
     val totalAlerts = spark.sql("SELECT COUNT(*) AS total_alerts FROM drone_data WHERE dangerousity > 0.9")
-    totalAlerts.show()
+    totalAlerts.write.mode("overwrite").csv("s3a://storageanalyse/total_alerts.csv")
 
     // Question 2: Nombre d'alertes par jour de la semaine
     val alertsByDayOfWeek = spark.sql("""
@@ -50,7 +50,7 @@ object DataAnalysis {
       GROUP BY dayofweek(from_unixtime(timestamp / 1000))
       ORDER BY total_alerts DESC
     """)
-    alertsByDayOfWeek.show()
+    alertsByDayOfWeek.write.mode("overwrite").csv("s3a://storageanalyse/alerts_by_day_of_week.csv")
 
     // Question 3: Nombre d'alertes par heure de la journée
     val alertsByHourOfDay = spark.sql("""
@@ -62,7 +62,7 @@ object DataAnalysis {
       GROUP BY hour(from_unixtime(timestamp / 1000))
       ORDER BY total_alerts DESC
     """)
-    alertsByHourOfDay.show()
+    alertsByHourOfDay.write.mode("overwrite").csv("s3a://storageanalyse/alerts_by_hour_of_day.csv")
 
     // Question 4: Nombre d'alertes par altitude et nom du fichier
     val alertsByAltitude = spark.sql("""
@@ -75,6 +75,6 @@ object DataAnalysis {
       GROUP BY altitude, file_name
       ORDER BY total_alerts DESC
     """)
-    alertsByAltitude.show()
+    alertsByAltitude.write.mode("overwrite").csv("s3a://storageanalyse/alerts_by_altitude.csv")
   }
 }

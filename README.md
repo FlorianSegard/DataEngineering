@@ -1,4 +1,4 @@
-## Data Engineering Project: Drone Data Processor
+### Data Engineering Project: Drone Data Processor
 
 ### Prerequisites
 
@@ -53,6 +53,18 @@ Before starting, ensure you have downloaded and extracted the following files at
 
    ```sh
    mc mb myminio/storageanalyse
+   ```
+
+8. **Configure Spark to use MinIO:**
+
+   Modify the `spark-defaults.conf` file located at `$SPARK_HOME/conf/spark-defaults.conf` (or `$SPARK_HOME/conf/spark-defaults.conf.template`):
+
+   ```properties
+   spark.hadoop.fs.s3a.endpoint           http://127.0.0.1:9000
+   spark.hadoop.fs.s3a.access.key         'StrongPass!2024'
+   spark.hadoop.fs.s3a.secret.key         hadoopUser123
+   spark.hadoop.fs.s3a.path.style.access  true
+   spark.hadoop.fs.s3a.impl               org.apache.hadoop.fs.s3a.S3AFileSystem
    ```
 
 ### Step-by-Step Execution
@@ -145,6 +157,12 @@ Before starting, ensure you have downloaded and extracted the following files at
 
    ```sh
    mc mb myminio/drone-data-lake
+   ```
+
+3. **Create a second bucket for storing analysis results:**
+
+   ```sh
+   mc mb myminio/storageanalyse
    ```
 
 #### 3. Spark

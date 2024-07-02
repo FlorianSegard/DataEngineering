@@ -27,7 +27,8 @@ object ConsumerAlert {
     val rawStream = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      //.option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", "localhost:9092,localhost:9093")
       .option("subscribe", "drone-data")
       .option("group.id", "groupalert")
       .option("startingOffsets", "earliest")
@@ -49,7 +50,7 @@ object ConsumerAlert {
       .selectExpr("CAST(id AS STRING) AS key", "to_json(struct(*)) AS value")
       .writeStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", "localhost:9092, localhost:9093")
       .option("topic", "high-danger-alerts")
       .option("checkpointLocation", "checkpoint/high-danger")
       .outputMode("update")

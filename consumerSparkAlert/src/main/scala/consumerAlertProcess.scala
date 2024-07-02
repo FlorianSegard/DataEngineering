@@ -35,7 +35,7 @@ object ConsumerAlertProcess {
     val rawStream = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", "localhost:9092, localhost:9093")
       .option("subscribe", "high-danger-alerts")
       .option("group.id", "groupalert")
       .option("startingOffsets", "earliest")

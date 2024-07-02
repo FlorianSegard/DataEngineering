@@ -195,7 +195,10 @@ Before starting, ensure you have downloaded and extracted the following files at
    - **Consumer for the alert process:**
 
      ```sh
-     spark-submit --class ConsumerAlertProcess --master local[*] --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,org.apache.kafka:kafka-clients:3.7.0 consumeralert_2.12-0.1.jar
+     spark-submit --class ConsumerAlertProcess \
+     --master local[*] \
+     --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,org.apache.kafka:kafka-clients:3. 7.0,org.scalaj:scalaj-http_2.12:2.4.2,com.typesafe.play:play-json_2.12:2.9.2 \
+     consumeralert_2.12-0.1.jar
      ```
 
 #### 4. Data Analysis
@@ -203,7 +206,7 @@ Before starting, ensure you have downloaded and extracted the following files at
 1. **Run the data analysis consumer:**
 
    ```sh
-   spark-submit --class ConsumerDatalake --master "local[*]" --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,org.apache.kafka:kafka-clients:3.7.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk:1.12.452 consumerdatalake_2.12-0.1.jar
+   spark-submit  --class DataAnalysis   --master "local[*]"   --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,org.apache.kafka:kafka-clients:3.7.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk:1.12.452   dronedataanalysis_2.12-0.1.jar
    ```
 
 ### Summary

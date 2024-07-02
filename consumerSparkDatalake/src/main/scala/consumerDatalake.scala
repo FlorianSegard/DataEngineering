@@ -9,7 +9,7 @@ object ConsumerDatalake {
       .appName("Drone Data Processor")
       .master("local[*]")
       .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
-      .config("spark.hadoop.fs.s3a.access.key", "StrongPass!2024")
+      .config("spark.hadoop.fs.s3a.access.key", "StrongPass2024")
       .config("spark.hadoop.fs.s3a.secret.key", "hadoopUser123")
       .config("spark.hadoop.fs.s3a.path.style.access", "true")
       .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
@@ -30,7 +30,7 @@ object ConsumerDatalake {
     val rawStream = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", "localhost:9092, localhost:9093")
       .option("subscribe", "drone-data")
       .option("group.id", "groupdatalake")
       .option("startingOffsets", "earliest")

@@ -8,7 +8,7 @@ object DataAnalysis {
       .appName("Drone Data Analysis")
       .master("local[*]")
       .config("spark.hadoop.fs.s3a.endpoint", "http://localhost:9000")
-      .config("spark.hadoop.fs.s3a.access.key", "StrongPass!2024")
+      .config("spark.hadoop.fs.s3a.access.key", "StrongPass2024")
       .config("spark.hadoop.fs.s3a.secret.key", "hadoopUser123")
       .config("spark.hadoop.fs.s3a.path.style.access", "true")
       .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")

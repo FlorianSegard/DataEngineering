@@ -1,4 +1,4 @@
-## Data Engineering Project: Drone Data Processor
+### Data Engineering Project: Drone Data Processor
 
 ### Prerequisites
 
@@ -49,6 +49,24 @@ Before starting, ensure you have downloaded and extracted the following files at
    mc mb myminio/drone-data-lake
    ```
 
+7. **Create a second bucket for storing analysis results:**
+
+   ```sh
+   mc mb myminio/storageanalyse
+   ```
+
+8. **Configure Spark to use MinIO:**
+
+   Modify the `spark-defaults.conf` file located at `$SPARK_HOME/conf/spark-defaults.conf` (or `$SPARK_HOME/conf/spark-defaults.conf.template`):
+
+   ```properties
+   spark.hadoop.fs.s3a.endpoint           http://127.0.0.1:9000
+   spark.hadoop.fs.s3a.access.key         'StrongPass!2024'
+   spark.hadoop.fs.s3a.secret.key         hadoopUser123
+   spark.hadoop.fs.s3a.path.style.access  true
+   spark.hadoop.fs.s3a.impl               org.apache.hadoop.fs.s3a.S3AFileSystem
+   ```
+
 ### Step-by-Step Execution
 
 #### 1. Kafka and Data Generation
@@ -56,19 +74,19 @@ Before starting, ensure you have downloaded and extracted the following files at
 1. **Start Zookeeper (in the first terminal):**
 
    ```sh
-   kafka_2.13-3.7.0/bin/zookeeper-server-start.sh kafka_2.13-3.7.0/config/zookeeper.properties
+   bin/zookeeper-server-start.sh config/zookeeper.properties
    ```
 
 2. **Start the first Kafka broker (in the second terminal):**
 
    ```sh
-   kafka_2.13-3.7.0/bin/kafka-server-start.sh kafka_2.13-3.7.0/config/server.properties
+   bin/kafka-server-start.sh config/server.properties
    ```
 
 3. **Start the second Kafka broker (in the third terminal):**
 
    ```sh
-   kafka_2.13-3.7.0/bin/kafka-server-start.sh kafka_2.13-3.7.0/config/server-1.properties
+   bin/kafka-server-start.sh config/server-1.properties
    ```
 
    Example configuration for `server-1.properties`:
@@ -82,18 +100,20 @@ Before starting, ensure you have downloaded and extracted the following files at
 4. **Create Kafka topics:**
 
    ```sh
-   kafka_2.13-3.7.0/bin/kafka-topics.sh --create --topic drone-data --bootstrap-server localhost:9092
-   kafka_2.13-3.7.0/bin/kafka-topics.sh --create --topic high-danger-alerts --bootstrap-server localhost:9092
+   bin/kafka-topics.sh --create --topic drone-data --bootstrap-server localhost:9092
+   bin/kafka-topics.sh --create --topic high-danger-alerts --bootstrap-server localhost:9092
    ```
 
 5. **Configure topics with 3 partitions:**
 
    ```sh
-   kafka_2.13-3.7.0/bin/kafka-topics.sh --alter --topic drone-data --partitions 3 --bootstrap-server localhost:9092
-   kafka_2.13-3.7.0/bin/kafka-topics.sh --alter --topic high-danger-alerts --partitions 3 --bootstrap-server localhost:9092
+   bin/kafka-topics.sh --alter --topic drone-data --partitions 3 --bootstrap-server localhost:9092
+   bin/kafka-topics.sh --alter --topic high-danger-alerts --partitions 3 --bootstrap-server localhost:9092
    ```
 
-6. **Assign partitions to brokers with replicas:**
+6. **Assign partitions to brokers with replicas to prevent data loss in case of a crash:**
+
+   Create a file named `topics.json` with the following content:
 
    ```json
    {
@@ -109,10 +129,15 @@ Before starting, ensure you have downloaded and extracted the following files at
    }
    ```
 
+   Execute the reassignment command:
+
+   ```sh
+   bin/kafka-reassign-partitions.sh --bootstrap-server localhost:9092 --reassignment-json-file topics.json --execute
+   ```
+
 7. **Generate data:**
 
    ```sh
-   cd streamDatageneration
    sbt clean
    sbt compile
    sbt run
@@ -132,6 +157,12 @@ Before starting, ensure you have downloaded and extracted the following files at
 
    ```sh
    mc mb myminio/drone-data-lake
+   ```
+
+3. **Create a second bucket for storing analysis results:**
+
+   ```sh
+   mc mb myminio/storageanalyse
    ```
 
 #### 3. Spark

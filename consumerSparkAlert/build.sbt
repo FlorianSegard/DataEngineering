@@ -10,5 +10,6 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-streaming" % "3.5.1",
   "org.apache.spark" %% "spark-streaming-kafka-0-10" % "3.5.1",
   "org.apache.kafka" % "kafka-clients" % "3.7.0",
-  "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M16",
+  "org.scalaj" %% "scalaj-http" % "2.4.2",
+  "com.typesafe.play" %% "play-json" % "2.9.2"
 )

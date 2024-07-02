@@ -2,18 +2,25 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.streaming.Trigger
 import org.apache.spark.sql.types._
-import sttp.client4.quick._
-import sttp.client4.Response
-import sttp.model.Uri
+import scalaj.http.Http
+import play.api.libs.json.Json
 
 object ConsumerAlertProcess {
-  def sendMsgWhatsApp(message: String): Unit =
-  {
-    val Uri: Uri = uri"https://api.callmebot.com/whatsapp.php?phone=+33695471584&text=$message&apikey=9366232"
-    val response: Response[String] = quickRequest
-      .get(Uri)
-      .send()
+  def sendMsgDiscord(message: String): Unit = {
+  val webhookUrl: String = "https://discord.com/api/webhooks/1257752927762907198/gz0G3_NJxWQ0x3Vr9MkM71P-JrH2Hb-resVCwgz6itQDseqBXcffEbxK18qji0LVxU0x"
+    val jsonPayload = Json.obj("content" -> message).toString()
+      val response = Http(webhookUrl)
+    .postData(jsonPayload)
+    .header("Content-Type", "application/json")
+    .asString
+
+  if (response.code != 204) {
+          println("Message successfully sent to Discord")
   }
+  else {
+            println(s"Failed to send message: Status code ${response.code}") 
+  }
+}
     def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder
       .appName("Drone Data Processor")
@@ -57,7 +64,6 @@ object ConsumerAlertProcess {
           val longitude = row.getAs[Double]("longitude")
           val altitude = row.getAs[Double]("altitude")
           val dangerousity = row.getAs[Double]("dangerousity")
-
           val message =
             s"""Alert \n
             time: $timestamp\n
@@ -66,7 +72,7 @@ object ConsumerAlertProcess {
             altitude: $altitude\n
             dangerousity: $dangerousity\n"""
 
-          sendMsgWhatsApp(message)
+          sendMsgDiscord(message)
         })
       }
       .start()
